@@ -1,5 +1,3 @@
-# MonJumper is a game that will be similar to geometry dash.
-
 #import modules
 import pygame
 from pygame.locals import *
@@ -36,19 +34,22 @@ class Game(object):
         # self.test_surface.fill(color)
         
         # sky surface
-        self.sky_surface = pygame.image.load('./graphics/Sky.png')
+        self.sky_surface = pygame.image.load('./graphics/Sky.png').convert()
         
         # ground surface
-        self.ground_surface = pygame.image.load('./graphics/ground.png')
+        self.ground_surface = pygame.image.load('./graphics/ground.png').convert()
         
         # text surface
         test_font = pygame.font.Font('./font/Pixeltype.ttf', 50)
         self.text_surface = test_font.render('My Game', False, 'Black')
         
-        # snail surface
-        self.snail_surface = pygame.image.load('./graphics/snail/snail1.png')
-        self.snail_x_pos = 600
-        self.snail_y_pos = 270
+        # snail surface and draws snail rectangle
+        self.snail_surface = pygame.image.load('./graphics/snail/snail1.png').convert_alpha()
+        self.snail_rectangle = self.snail_surface.get_rect(bottomright = (600, 300))
+        
+        #player_surface and draws player rectangle
+        self.player_surface = pygame.image.load('./graphics/Player/player_walk_1.png').convert_alpha()
+        self.player_rectangle = self.player_surface.get_rect(midbottom = (80,300))
         
         
         
@@ -64,16 +65,31 @@ class Game(object):
         self.background_screen.blit(self.text_surface, (300,50))
         
         # snail surface
-        self.snail_x_pos -= 4
+        self.snail_rectangle.x -= 1
         
-        if self.snail_x_pos < -100:
-            self.snail_x_pos = 800
+        if self.snail_rectangle.x <= 0:
+            self.snail_rectangle.left = 800
     
-        self.background_screen.blit(self.snail_surface, (self.snail_x_pos, self.snail_y_pos))
+        self.background_screen.blit(self.snail_surface, self.snail_rectangle)
+        
+        # player surface
+        self.player_rectangle.left += 1
+        # print(self.player_rectangle.left)
+        
+        self.background_screen.blit(self.player_surface, self.player_rectangle)
         
         
-        
-        
+    def checkCollisions(self):
+        if self.player_rectangle.colliderect(self.snail_rectangle) == 1:
+            print("collision")
+            self.player_rectangle.x -= 15
+            self.snail_rectangle.x += 30
+            
+            
+            
+            
+    
+    
 
     def gameLoop(self):
         # Game loop for screen to run
@@ -95,6 +111,9 @@ class Game(object):
             
             #resizable screen
             self.screen.blit(pygame.transform.scale(self.background_screen, self.screen.get_rect().size), (0,0))
+            
+            # check collision between player_rectangle and snail_rectangle
+            self.checkCollisions()
             
             # draw all our elements and update everything in here:
             pygame.display.update()
